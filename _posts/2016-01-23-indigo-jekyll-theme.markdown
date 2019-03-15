@@ -1,7 +1,7 @@
 ---
 title: #":ramen: Yuan Lee"
 layout: post
-date: 2019-3-9 22:22
+date: 2016-1-23 22:22
 tag: Lee
 image: #http://localhost:4000/assets/images/profile.jpg
 headerImage: false
@@ -9,7 +9,7 @@ projects: true
 hidden: true # don't count this post in blog pagination
 description: "This is a simple and minimalist template for Jekyll for those who likes to eat noodles."
 category: project
-author: Yuan Lee
+author: #Yuan Lee
 externalLink: false
 ---
 
