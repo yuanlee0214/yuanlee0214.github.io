@@ -36,10 +36,10 @@ description: #Markdown summary with different options
 
 
 <h4>在需要加载大图的时候，创建 imageView 继承自此 LargeImageView 即可</h4>
-
-    LargeImageView *imageView = [LargeImageView new];
-    [imageView setImage:image];
-
+{% highlight raw %}
+LargeImageView *imageView = [LargeImageView new];
+[imageView setImage:image];
+{% endhighlight %}
 <h5>头文件 "LargeImageView.h"</h5>
 {% highlight raw %}
 //
