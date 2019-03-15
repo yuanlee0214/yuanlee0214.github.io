@@ -1,11 +1,11 @@
 ---
-title: "Shadowsocks"
+title: "iOS加载大图避免占用过多内存"
 layout: post
 date: 2019-3-9 12:00
 image: #/assets/images/markdown.jpg
 headerImage: false
 tag:
-- Shadowsocks
+- iOS
 category: blog
 author: #Yuan Lee
 description: #Markdown summary with different options
@@ -16,9 +16,9 @@ description: #Markdown summary with different options
 
 在需要加载大图的时候，创建 imageView 继承自此 LargeImageView 即可
 
-#### 前言
+### 前言
 
-##### 首先分析一下图片加载到内存的大小的计算方法
+#### 首先分析一下图片加载到内存的大小的计算方法
 
 - 如果是位图，则位图多大，加载到内存中所占用的空间就是多大
 
@@ -28,7 +28,7 @@ description: #Markdown summary with different options
 
 - 比如一张 1000 x 1000 的png图片，则其解压出来的位图的占用大小为1000 x 1000 x 4(即3.81MB左右)，也就是说这张图片会占用3.81MB左右的内存。
 
-##### Apple官方的解决办法
+#### Apple官方的解决办法
 
 - 把大图片进行分片加载。根据原图的分片CGRect获取到原图的一个小分片p1，根据缩放后的分片CGRect和 p1生成缩放后的小分片，绘制到屏幕，这样一直循环把原图片全部的每个小分片全部生成对应缩放的小分片，然后绘制。
 
@@ -37,8 +37,8 @@ description: #Markdown summary with different options
 
 <h4>在需要加载大图的时候，创建 imageView 继承自此 LargeImageView 即可</h4>
 
-        LargeImageView *imageView = [LargeImageView new];
-        [imageView setImage:image];
+    LargeImageView *imageView = [LargeImageView new];
+    [imageView setImage:image];
 
 <h5>头文件 "LargeImageView.h"</h5>
 {% highlight raw %}
@@ -85,7 +85,7 @@ NS_ASSUME_NONNULL_END
 
 - (void)setImage:(UIImage *)image {
     if (tiledCount == 0) {
-        tiledCount = 9;
+        tiledCount = 81;
     }
     originImage = image;
     [self setBackgroundColor:[UIColor whiteColor]];
