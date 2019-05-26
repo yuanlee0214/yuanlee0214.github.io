@@ -408,21 +408,10 @@ pip3 -v
 {% endhighlight %}
 
 然而却出现了 E: Unable to locate package python3-pip 错误，原因很简单，就是自带的源没有找到python3-pip这个包，执行下面的语句更新源即可
-<!-- ，所以要先添加下面的源： -->
-<!-- {% highlight raw %}
-# 打开源配置文件
-sudo vim /etc/apt/sources.list 
-
-# 在原有基础上添加以下的源
-deb http://cn.archive.ubuntu.com/ubuntu bionic main multiverse restricted universe
-deb http://cn.archive.ubuntu.com/ubuntu bionic-updates main multiverse restricted universe
-deb http://cn.archive.ubuntu.com/ubuntu bionic-security main multiverse restricted universe
-deb http://cn.archive.ubuntu.com/ubuntu bionic-proposed main multiverse restricted universe  -->
 {% highlight raw %}
 # 更新一下源
 sudo apt update
 {% endhighlight %}
-<!-- {% endhighlight %} -->
 
 更新好源后，再次执行 sudo apt install python3-pip 便能下载安装了。
 到这里pip算是装好，但如果你在执行 pip3 -V 后报以下异常的话，可以执行
