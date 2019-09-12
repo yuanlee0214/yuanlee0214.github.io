@@ -46,6 +46,8 @@ Demo Github 地址: [https://github.com/yuanlee0214/iOS-MVC-Demo][2]
 
 <h5>实现文件 "LEEDetailVC.m"</h5>
 {% highlight raw %}
+#define LEEContentHeight (LEESHeight - StatusBarAndNavigationBarHeight - TabbarSafeBottomMargin)
+
 #import "LEEDetailVC.h"
 #import "LargeImageView.h"
 
@@ -62,32 +64,32 @@ Demo Github 地址: [https://github.com/yuanlee0214/iOS-MVC-Demo][2]
 
 @implementation LEEDetailVC
 
-static BOOL SDImageCacheOldShouldDecompressImages = YES;
-static BOOL SDImagedownloderOldShouldDecompressImages = YES;
+//static BOOL SDImageCacheOldShouldDecompressImages = YES;
+//static BOOL SDImagedownloderOldShouldDecompressImages = YES;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     
     [self layoutView];
     
-    [[SDWebImageManager sharedManager].imageCache setMaxMemoryCost:30*1024*1024]; // 设置图片总缓存 30M 大小，默认为0没有限制
-    [[SDWebImageManager sharedManager].imageCache.config setMaxCacheSize:3*1024*1024]; // 设置单个图片限制 3M 大小
-    [[SDWebImageManager sharedManager].imageCache.config setMaxCacheAge:60*60*24]; // 设置缓存保留时间为 1 天
-
-    SDImageCache *canche = [SDImageCache sharedImageCache];
-    SDImageCacheOldShouldDecompressImages = canche.config.shouldDecompressImages;
-    canche.config.shouldDecompressImages = NO;
-
-    SDWebImageDownloader *sdDownloder = [SDWebImageDownloader sharedDownloader];
-    SDImagedownloderOldShouldDecompressImages = sdDownloder.shouldDecompressImages;
-    sdDownloder.shouldDecompressImages = NO;
+//    [[SDWebImageManager sharedManager].imageCache setMaxMemoryCost:30*1024*1024]; // 设置图片总缓存 30M 大小，默认为0没有限制
+//    [[SDWebImageManager sharedManager].imageCache.config setMaxCacheSize:3*1024*1024]; // 设置单个图片限制 3M 大小
+//    [[SDWebImageManager sharedManager].imageCache.config setMaxCacheAge:60*60*24]; // 设置缓存保留时间为 1 天
+//
+//    SDImageCache *canche = [SDImageCache sharedImageCache];
+//    SDImageCacheOldShouldDecompressImages = canche.config.shouldDecompressImages;
+//    canche.config.shouldDecompressImages = NO;
+//
+//    SDWebImageDownloader *sdDownloder = [SDWebImageDownloader sharedDownloader];
+//    SDImagedownloderOldShouldDecompressImages = sdDownloder.shouldDecompressImages;
+//    sdDownloder.shouldDecompressImages = NO;
     
 }
 
 - (void)didReceiveMemoryWarning {
     // 清除缓存
     [[SDWebImageManager sharedManager] cancelAll];
-    [[SDWebImageManager sharedManager].imageCache clearMemory];
+    [[SDWebImageManager sharedManager].imageCache clearWithCacheType:SDImageCacheTypeAll completion:nil];
     [[SDImageCache sharedImageCache] setValue:nil forKey:_imgKey];
 }
 
@@ -127,9 +129,9 @@ static BOOL SDImagedownloderOldShouldDecompressImages = YES;
 
 #pragma mark -- 公有方法
 - (void)layoutView {
-    [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor blackColor], NSFontAttributeName : [UIFont systemFontOfSize:16]}];
+    [self.navigationController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor whiteColor], NSFontAttributeName : [UIFont systemFontOfSize:16]}];
     self.title = _imgKey;
-    self.view.backgroundColor = LEEHexColor(0xffffff, 1.0);
+    self.view.backgroundColor = LEEHexColor(0xDBDBDB, 1.0);
     
     scrollV = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 64, LEESWidth, LEESHeight - 64)];
     [self.view addSubview:scrollV];
@@ -146,20 +148,20 @@ static BOOL SDImagedownloderOldShouldDecompressImages = YES;
     UITapGestureRecognizer *tapTwice = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapTwiceCallback:)];
     tapTwice.numberOfTapsRequired = 2;
     [scrollV addGestureRecognizer:tapTwice];
-    
-    if (_imgName) {  // 加载本地图片
+	
+    if (_imgName.length) {  // 加载本地图片
         UIImage *image = [UIImage imageNamed:_imgName];
         CGFloat imgH = [self imageContentHeight:image];
         scrollV.contentSize = CGSizeMake(LEESWidth, imgH);
-        if (imgH < LEESHeight - 64) {  // 不是长图片时，居中显示
-            imgV = [[LargeImageView alloc] initWithFrame:CGRectMake(0, LEESHeight / 2 - imgH / 2 - 32, LEESWidth, imgH)];
+        if (imgH < LEEContentHeight) {  // 不是长图片时，居中显示
+            imgV = [[LargeImageView alloc] initWithFrame:CGRectMake(0, LEEContentHeight / 2 - imgH / 2, LEESWidth, imgH)];
         } else { // 长图片时铺满 scrollView
             imgV = [[LargeImageView alloc] initWithFrame:CGRectMake(0, 0, LEESWidth, imgH)];
         }
         [imgV setImage:image];
         imgV.contentMode = UIViewContentModeScaleAspectFill;
         [scrollV addSubview:imgV];
-
+        
         return;
     }
     
@@ -187,10 +189,10 @@ static BOOL SDImagedownloderOldShouldDecompressImages = YES;
 
     UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
     [errorV addSubview:btn];
-    btn.sd_layout.widthIs(200).heightIs(50).centerXEqualToView(netErrorImgV).topSpaceToView(errorLab, 15);
+    btn.sd_layout.widthIs(200).heightIs(40).centerXEqualToView(netErrorImgV).topSpaceToView(errorLab, 15);
     [btn setTitle:@"Refresh" forState:UIControlStateNormal];
     [btn setTitleColor:LEEHexColor(0x2472B9, 1.0) forState:UIControlStateNormal];
-    btn.titleLabel.font = [UIFont systemFontOfSize:20];
+    btn.titleLabel.font = [UIFont systemFontOfSize:17];
     btn.backgroundColor = [UIColor whiteColor];
     btn.layer.borderColor = LEEHexColor(0x2472B9, 1.0).CGColor;
     btn.layer.borderWidth = 1.0f;
@@ -201,8 +203,8 @@ static BOOL SDImagedownloderOldShouldDecompressImages = YES;
     if (image) {
         CGFloat imgH = [self imageContentHeight:image];
         scrollV.contentSize = CGSizeMake(LEESWidth, imgH);
-        if (imgH < LEESHeight - 64) {  // 不是长图片时，居中显示
-            imgV = [[LargeImageView alloc] initWithFrame:CGRectMake(0, LEESHeight / 2 - imgH / 2 - 32, LEESWidth, imgH)];
+        if (imgH < LEEContentHeight) {  // 不是长图片时，居中显示
+            imgV = [[LargeImageView alloc] initWithFrame:CGRectMake(0, LEEContentHeight / 2 - imgH / 2, LEESWidth, imgH)];
         } else { // 长图片时铺满 scrollView
             imgV = [[LargeImageView alloc] initWithFrame:CGRectMake(0, 0, LEESWidth, imgH)];
         }
@@ -212,31 +214,36 @@ static BOOL SDImagedownloderOldShouldDecompressImages = YES;
     } else {
         // 网络请求时状态栏转圈圈
         [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-        
+		
+        /*
         // 屏幕中间转圈
         activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
         [scrollV addSubview:activityIndicatorView];
-        activityIndicatorView.center = CGPointMake(LEESWidth / 2.0, LEESHeight / 2.0  - 50);
+        activityIndicatorView.center = CGPointMake(LEESWidth / 2.0, LEEContentHeight / 2.0  - 50);
         CGAffineTransform transform =  CGAffineTransformMakeScale(1.5, 1.5);
         activityIndicatorView.transform = transform;
         [activityIndicatorView startAnimating];
         activityIndicatorView.hidesWhenStopped = YES;
         // 加载中
-        loadingLab = [[UILabel alloc] initWithFrame:CGRectMake(0, LEESHeight / 2.0 - 20, LEESWidth, 20)];
+        loadingLab = [[UILabel alloc] initWithFrame:CGRectMake(0, LEEContentHeight / 2.0 - 20, LEESWidth, 20)];
         [scrollV addSubview:loadingLab];
         loadingLab.text = @"Loading";
         loadingLab.textColor = LEEHexColor(0xcccccc, 1.0);
         loadingLab.textAlignment = NSTextAlignmentCenter;
         loadingLab.font = [UIFont systemFontOfSize:18];
+         */
         
+        [self showHud];
         SDWebImageDownloader *downloader = [SDWebImageDownloader sharedDownloader];
-        //downloader.downloadTimeout = 10.0;  //设置下载超时:10秒
+        downloader.config.downloadTimeout = 10.0;  //设置下载超时:10秒
         [downloader downloadImageWithURL:[NSURL URLWithString:_imgURL]
                                  options:0
                                 progress:^(NSInteger receivedSize, NSInteger expectedSize, NSURL * _Nullable targetURL) {
                                     // progression tracking code
                                 }
                                completed:^(UIImage *image, NSData *data, NSError *error, BOOL finished) {
+                                   [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+                                   [self hidHud];
                                    if(error) {
                                        //延迟 1秒 显示下载失败提示
                                        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
@@ -247,21 +254,19 @@ static BOOL SDImagedownloderOldShouldDecompressImages = YES;
                                    if (image && finished) {
                                        [[SDImageCache sharedImageCache] storeImage:image forKey:self->_imgKey toDisk:NO completion:nil];
                                        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.01 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                                           self->loadingLab.hidden = YES;
-                                           [self->activityIndicatorView stopAnimating];
+                                           //self->loadingLab.hidden = YES;
+                                           //[self->activityIndicatorView stopAnimating];
                                            //[self->activityIndicatorView removeFromSuperview];
-                                           // 网络请求结束时停止转圈圈
-                                           [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
                                            CGFloat imgH = [self imageContentHeight:image];
                                            self->scrollV.contentSize = CGSizeMake(LEESWidth, imgH);
-                                            if (imgH < LEESHeight - 64) { // 不是长图片时，居中显示
-                                                self->imgV = [[LargeImageView alloc] initWithFrame:CGRectMake(0, LEESHeight / 2 - imgH / 2 - 32, LEESWidth, imgH)];
-                                            } else {  // 长图片时铺满 scrollView
-                                                self->imgV = [[LargeImageView alloc]initWithFrame:CGRectMake(0, 0, LEESWidth, imgH)];
-                                            }
-                                            [self->imgV setImage:image];
-                                            self->imgV.contentMode = UIViewContentModeScaleAspectFill;
-                                            [self->scrollV addSubview:self->imgV];
+                                           if (imgH < LEEContentHeight) { // 不是长图片时，居中显示
+                                               self->imgV = [[LargeImageView alloc] initWithFrame:CGRectMake(0, LEEContentHeight / 2 - imgH / 2, LEESWidth, imgH)];
+                                           } else {  // 长图片时铺满 scrollView
+                                               self->imgV = [[LargeImageView alloc] initWithFrame:CGRectMake(0, 0, LEESWidth, imgH)];
+                                           }
+                                           [self->imgV setImage:image];
+                                           self->imgV.contentMode = UIViewContentModeScaleAspectFill;
+                                           [self->scrollV addSubview:self->imgV];
                                        });
                                    }
                                }];
@@ -273,17 +278,17 @@ static BOOL SDImagedownloderOldShouldDecompressImages = YES;
     [self.view.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
     
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.01 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-    [self layoutView];
+        [self layoutView];
     });
 }
 
 - (void)dealloc {
     NSLog(@"%@ 类 dealloc",[self class]);
-    SDImageCache *canche = [SDImageCache sharedImageCache];
-    canche.config.shouldDecompressImages = SDImageCacheOldShouldDecompressImages;
+    //SDImageCache *canche = [SDImageCache sharedImageCache];
+    //canche.config.shouldDecompressImages = SDImageCacheOldShouldDecompressImages;
     
-    SDWebImageDownloader *downloder = [SDWebImageDownloader sharedDownloader];
-    downloder.shouldDecompressImages = SDImagedownloderOldShouldDecompressImages;
+    //SDWebImageDownloader *downloder = [SDWebImageDownloader sharedDownloader];
+    //downloder.shouldDecompressImages = SDImagedownloderOldShouldDecompressImages;
 }
 
 @end

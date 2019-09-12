@@ -115,19 +115,17 @@ Demo Github 地址: [https://github.com/yuanlee0214/iOS-MVC-Demo][2]
 
 - (void)layoutView {
     
-    // titleLabel  cell的标题显示在左侧
-    UILabel *titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(autoScaleH(15), 0, autoScaleH(100), autoScaleV(57.5))];
-    titleLabel.font = [UIFont systemFontOfSize:autoScaleF(19)];
-    titleLabel.textColor = SHBHexColor(0x333333, 1.0);
+    // titleLabel
+    UILabel *titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(30, 0, 200, 45)];
+    titleLabel.font = [UIFont systemFontOfSize:autoScaleF(17)];
+    titleLabel.textColor = LEEHexColor(0x333333, 1.0);
     titleLabel.textAlignment = NSTextAlignmentLeft;
-    titleLabel.centerY = autoScaleV(57.5) / 2.0;
     [self.contentView addSubview:titleLabel];
     _titleLabel = titleLabel;
     
-    // imgV  自定义cell的图片显示在右侧
+    // imgV
     UIImageView *imgView = [[UIImageView alloc] init];
-    imgView.frame = CGRectMake(SHBSWidth - autoScaleH(100), 0, autoScaleH(81), autoScaleV(57.5));
-    imgView.centerY = autoScaleV(57.5) / 2.0;
+    imgView.frame = CGRectMake(LEESWidth - autoScaleH(50), 9, 27, 27);
     [self.contentView addSubview:imgView];
     _imgView = imgView;
 }
@@ -165,11 +163,15 @@ Demo Github 地址: [https://github.com/yuanlee0214/iOS-MVC-Demo][2]
 #import "MJRefresh.h"
 #import "LEEDetailVC.h"
 #import "LEECellModel.h"
+#import "UIImage+Color.h"
 #import "LEETableViewCell.h"
 #import "MainViewController.h"
+#import "LEEDemoForMVC-Swift.h"
 
 @interface MainViewController () <UITableViewDelegate, UITableViewDataSource>
-@property (nonatomic, weak) UITableView *tableView;
+@property (nonatomic, strong) NSArray *titleArray;
+@property (nonatomic, strong) UITableView *tableView;
+@property (nonatomic, strong) NSMutableArray *dataSource;
 @end
 
 @implementation MainViewController
@@ -177,23 +179,17 @@ Demo Github 地址: [https://github.com/yuanlee0214/iOS-MVC-Demo][2]
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self layoutView];
+    [self initDataSource];
 }
 
 #pragma mark -- TableView Delegate
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 3;
+    return self.dataSource.count;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    NSInteger num = 0;
-    if (section == 0) {
-        num = 3;
-    } else if (section == 1) {
-        num = 2;
-    } else { // 2
-        num = 1;
-    }
-    return num;
+    NSMutableArray *array = self.dataSource[section];
+    return array.count;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
@@ -201,11 +197,36 @@ Demo Github 地址: [https://github.com/yuanlee0214/iOS-MVC-Demo][2]
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return 50;
+    return 45;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
     return CGFLOAT_MIN;
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
+    static NSString *headerIdentifier = @"headerView";
+    UITableViewHeaderFooterView *headerView = [tableView dequeueReusableHeaderFooterViewWithIdentifier:headerIdentifier];
+    if (!headerView) {
+        headerView = [[UITableViewHeaderFooterView alloc] initWithReuseIdentifier:headerIdentifier];
+        //headerView.backgroundColor = LEEHexColor(0xeeeeee, 1.0);
+        headerView.backgroundView = [[UIImageView alloc] initWithImage:[UIImage imageWithColor:LEEHexColor(0xeeeeee, 1.0)]];
+        UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(15, 0, LEESWidth - 30, 35)];
+        label.tag = 1001;
+        label.textColor = LEEHexColor(0x333333, 1.0);
+        label.font = [UIFont systemFontOfSize:autoScaleF(16)];
+        label.textAlignment = NSTextAlignmentLeft;
+        [headerView addSubview:label];
+    }
+    
+    UILabel *label = (UILabel *)[headerView viewWithTag:1001];
+    label.text = self.titleArray[section];
+    
+    return headerView;
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section {
+    return [[UIView alloc] init];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -215,28 +236,12 @@ Demo Github 地址: [https://github.com/yuanlee0214/iOS-MVC-Demo][2]
         cell = [[LEETableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:NSStringFromClass([LEETableViewCell class])];
     }
     LEECellModel *model;
-    if (indexPath.section == 0) {
-        if (indexPath.row == 0) {
-            model = [[LEECellModel alloc] initWithTitle:@"NetImg 1"
-                                                imgName:@"pic1"];
-        } else if (indexPath.row == 1) {
-            model = [[LEECellModel alloc] initWithTitle:@"NetImg 2"
-                                                imgName:@"pic2"];
-        } else if (indexPath.row == 2) {
-            model = [[LEECellModel alloc] initWithTitle:@"NetImg 3"
-                                                imgName:@"pic3"];
+    
+    if (self.dataSource.count) {
+        NSDictionary *dic = self.dataSource[indexPath.section][indexPath.row];
+        if (dic[@"model"]) {
+            model = dic[@"model"];
         }
-    } else if (indexPath.section == 1) {
-        if (indexPath.row == 0) {
-            model = [[LEECellModel alloc] initWithTitle:@"LocalImg 1"
-                                                imgName:@"pic4"];
-        } else { // 1
-            model = [[LEECellModel alloc] initWithTitle:@"LocalImg 2"
-                                                imgName:@"pic5"];
-        }
-    } else { // 2
-        model = [[LEECellModel alloc] initWithTitle:@"NetLongImg"
-                                            imgName:@"pic6"];
     }
     [cell setModel:model];
     return cell;
@@ -244,73 +249,79 @@ Demo Github 地址: [https://github.com/yuanlee0214/iOS-MVC-Demo][2]
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    LEEDetailVC *detailVC = [[LEEDetailVC alloc] init];
-    if (indexPath.section == 0) {  // 加载网络大图的三个cell
-        if (indexPath.row == 0) {
-            detailVC.imgKey = @"NetImg 1";
-            detailVC.imgURL = @"https://get.pxhere.com/photo/horizon-structure-sky-highway-stadium-atmosphere-of-earth-sport-venue-57501.jpg";
-        } else if (indexPath.row == 1) {
-            detailVC.imgKey = @"NetImg 2";
-            detailVC.imgURL = @"http://www.wanwenku.com/uploadfile/2016/0528/20160528125916910.jpg";
-        } else if (indexPath.row == 2) {
-            detailVC.imgKey = @"NetImg 3";
-            detailVC.imgURL = @"http://res.downhot.com/d/file/p/2014/07/20/418aba73e413176ba3ec9f8f2df5a465.jpg";
+    if (indexPath.section < 3) {
+        LEEDetailVC *detailVC = [[LEEDetailVC alloc] init];
+        if (self.dataSource.count) {
+            NSDictionary *dic = self.dataSource[indexPath.section][indexPath.row];
+            if (dic[@"imgName"]) {
+                detailVC.imgName = dic[@"imgName"];
+            }
+            if (dic[@"imgKey"]) {
+                detailVC.imgKey = dic[@"imgKey"];
+            }
+            if (dic[@"imgURL"]) {
+                detailVC.imgURL = dic[@"imgURL"];
+            }
         }
-    } else if (indexPath.section == 1) {  // 加载本地大图的两个cell
-        if (indexPath.row == 0) {
-            detailVC.imgKey = @"LocalImg 1";
-            detailVC.imgName = @"BigPic1";  // 这张图片10M, 加载起来很慢
-        } else {
-            detailVC.imgKey = @"LocalImg 2";
-            detailVC.imgName = @"BigPic2";  // 这张图片5M, 加载起来速度尚可
-        }
-    } else { // 2  加载网络长图的一个cell
-        detailVC.imgKey = @"LongImg";
-        detailVC.imgURL = @"http://ww2.sinaimg.cn/large/bd2fd49bgw1e26kv4tyqwj.jpg";
+        [self.navigationController pushViewController:detailVC animated:YES];
+    } else {
+        LEESwiftVC *swift = [[LEESwiftVC alloc] init];
+        [self.navigationController pushViewController:swift animated:YES];
     }
-    [self.navigationController pushViewController:detailVC animated:YES];
 }
 
-- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
+- (void)initDataSource {
+    [_dataSource removeAllObjects];
     
-    UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, LEESWidth, 35)];
-    headerView.backgroundColor = LEEHexColor(0xeeeeee, 1.0);
-    [self.view addSubview:headerView];
+    // 三个网络大图 Section 0
+    LEECellModel *model01 = [[LEECellModel alloc] initWithTitle:@"NetImg 1" imgName:@"pic1"];
+    NSString *imgURL01 = @"http://www.wanwenku.com/uploadfile/2016/0616/20160616111704532.jpg";
+    NSDictionary *dic01 = @{@"model":model01, @"imgKey":@"NetImg 1", @"imgURL":imgURL01, @"imgName":@""};
     
-    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(20, 0, LEESWidth - 30, 35)];
-    label.text = @"";
-    label.textColor = LEEHexColor(0x333333, 1.0);
-    label.font = [UIFont systemFontOfSize:17];
-    label.textAlignment = NSTextAlignmentLeft;
-    [headerView addSubview:label];
+    LEECellModel *model02 = [[LEECellModel alloc] initWithTitle:@"NetImg 2" imgName:@"pic2"];
+    NSString *imgURL02 = @"http://www.wanwenku.com/uploadfile/2016/0528/20160528125916910.jpg";
+    NSDictionary *dic02 = @{@"model":model02, @"imgKey":@"NetImg 2", @"imgURL":imgURL02, @"imgName":@""};
     
-    if (section == 0) {
-        UIView *line = [[UIView alloc] initWithFrame:CGRectMake(0, 0, LEESWidth, 0.5)];
-        line.backgroundColor = LEEHexColor(0xcccccc, 1.0);
-        [headerView addSubview:line];
-        label.text = @"网络大图";
-    } else if (section == 1) {
-        label.text = @"本地大图";
-    } else { // 2
-        label.text = @"网络长图";
-    }
+    LEECellModel *model03 = [[LEECellModel alloc] initWithTitle:@"NetImg 3" imgName:@"pic3"];
+    NSString *imgURL03 = @"http://www.wanwenku.com/uploadfile/2016/0514/20160514120203208.jpg";
+    NSDictionary *dic03 = @{@"model":model03, @"imgKey":@"NetImg 3", @"imgURL":imgURL03, @"imgName":@""};
+    NSMutableArray *array1 = [NSMutableArray arrayWithObjects:dic01, dic02, dic03, nil];
     
-    return headerView;
-}
-
-- (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section {
-    return [[UIView alloc] init];
+    // 两个本地大图 Section 1
+    LEECellModel *model11 = [[LEECellModel alloc] initWithTitle:@"LocalImg 1" imgName:@"pic4"];
+    NSDictionary *dic11 = @{@"model":model11, @"imgKey":@"LocalImg 1", @"imgURL":@"", @"imgName":@"BigPic1"}; // 这张图片10M, 加载起来很慢
+    
+    LEECellModel *model12 = [[LEECellModel alloc] initWithTitle:@"LocalImg 2" imgName:@"pic5"];
+    NSDictionary *dic12 = @{@"model":model12, @"imgKey":@"LocalImg 2", @"imgURL":@"", @"imgName":@"BigPic2"}; // 这张图片5M, 加载起来速度尚可
+    NSMutableArray *array2 = [NSMutableArray arrayWithObjects:dic11, dic12, nil];
+    
+    // 网络长图 Section 2
+    LEECellModel *model31 = [[LEECellModel alloc] initWithTitle:@"NetLongImg" imgName:@"pic6"];
+    NSDictionary *dic31 = @{@"model":model31, @"imgKey":@"LongImg", @"imgURL":@"http://ww2.sinaimg.cn/large/bd2fd49bgw1e26kv4tyqwj.jpg", @"imgName":@""};
+    NSMutableArray *array3 = [NSMutableArray arrayWithObjects:dic31, nil];
+    
+    // Swift Section 3
+    LEECellModel *model41 = [[LEECellModel alloc] initWithTitle:@"Swift" imgName:@"swift"];
+    NSDictionary *dic41 = @{@"model":model41, @"imgKey":@"", @"imgURL":@"", @"imgName":@""};
+    NSMutableArray *array4 = [NSMutableArray arrayWithObjects:dic41, nil];
+    
+    [self.dataSource addObject:array1];
+    [self.dataSource addObject:array2];
+    [self.dataSource addObject:array3];
+    [self.dataSource addObject:array4];
+    
+    [self.tableView reloadData];
 }
 
 #pragma mark -- 公有方法
 - (void)layoutView {
     self.view.backgroundColor = LEEHexColor(0xffffff, 1.0);
-    self.title = @"YuanLee";
+    self.navigationItem.title = @"YuanLee";
     
-    UIBarButtonItem *backBtn = [[UIBarButtonItem alloc] init];
-    backBtn.title = @"返回";
+    //UIBarButtonItem *backBtn = [[UIBarButtonItem alloc] init];
+    //backBtn.title = @"返回";
     // 修改导航栏上返回按钮上的文字，注意这里的self是父ViewController,不是即将显示的子ViewController
-    self.navigationItem.backBarButtonItem = backBtn;
+    //self.navigationItem.backBarButtonItem = backBtn;
     
     UITableView *tableView = [[UITableView alloc] initWithFrame:self.view.bounds
                                                           style:UITableViewStyleGrouped];
@@ -349,9 +360,17 @@ Demo Github 地址: [https://github.com/yuanlee0214/iOS-MVC-Demo][2]
 
 - (void)refreshData
 {
-    //2秒后刷新表格UI
+    [self showHudWithText:@"Loading..."];
+    //[self showHudInWindowWithText:@"Loading..."];
+    
+    //1秒后刷新表格UI
     __weak UITableView *tableView = self.tableView;
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        
+        //[MBProgressHUD hideHUDForView:self.view.window animated:YES];
+        //[hud hideAnimated:YES afterDelay:0.5];
+        [self.hud hideAnimated:YES afterDelay:0.5];
+        
         // 刷新表格
         [tableView reloadData];
         
@@ -359,6 +378,21 @@ Demo Github 地址: [https://github.com/yuanlee0214/iOS-MVC-Demo][2]
         [tableView.mj_header endRefreshing];
     });
 }
+
+- (NSMutableArray *)dataSource {
+    if (!_dataSource) {
+        _dataSource = [NSMutableArray array];
+    }
+    return _dataSource;
+}
+
+- (NSArray *)titleArray {
+    if (!_titleArray) {
+        _titleArray = @[@"网络大图", @"本地大图", @"网络长图", @"Swift"];
+    }
+    return _titleArray;
+}
+
 
 @end
 {% endhighlight %}
