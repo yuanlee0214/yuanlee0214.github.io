@@ -11,9 +11,7 @@ layout: page
 <h2>Skills</h2>
 
 <ul class="skill-list">
-	<li>iOS</li>
-	<li>Android</li>
-	<li>Mini Program</li>
+	<li>iOS Development</li>
 </ul>
 
 <h2>GitHub</h2>
